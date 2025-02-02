@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IoT Resource Management Demo</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 80%;
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+        }
+        .room {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+        }
+        .room-section {
+            width: 45%;
+            padding: 10px;
+            border-radius: 10px;
+            background: #f0f0f0;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+        .desk {
+            background: #ddd;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 150px;
+            position: relative;
+        }
+        .desk p {
+            margin: 0;
+            font-size: 20px;
+        }
+
+        /* Visual representation of the person */
+        .person {
+            position: absolute;
+            bottom: 10px;
+            width: 40px;
+            height: 40px;
+            background-color: #ff6347;
+            border-radius: 50%;
+            transition: transform 1s ease-in-out;
+        }
+
+        /* Animation for moving person in and out */
+        .person-enter {
+            transform: translateX(0);
+        }
+
+        .person-exit {
+            transform: translateX(-200px);
+        }
+
+        .resource {
+            margin: 10px 0;
+            font-size: 18px;
+            padding: 10px;
+            border-radius: 5px;
+            background: #ccc;
+            color: white;
+        }
+        .resource.on {
+            background-color: #28a745; /* Green */
+        }
+        .resource.off {
+            background-color: #dc3545; /* Red */
+        }
+        .action-buttons {
+            margin-top: 20px;
+        }
+        .action-buttons button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            margin: 5px;
+            cursor: pointer;
+        }
+        .action-buttons button:hover {
+            background-color: #0056b3;
+        }
+        .status {
+            font-size: 20px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>IoT Resource Management Simulation</h1>
+
+        <!-- Room representation -->
+        <div class="room">
+            <!-- Desk Section -->
+            <div class="room-section">
+                <h3>Desk Area</h3>
+                <div class="desk" id="desk1">
+                    <p>Desk 1</p>
+                    <div class="person" id="person1"></div>
+                </div>
+                <div class="desk" id="desk2">
+                    <p>Desk 2</p>
+                </div>
+            </div>
+
+            <!-- Resource Section -->
+            <div class="room-section">
+                <h3>Resources</h3>
+                <div id="light" class="resource off">Light: Off</div>
+                <div id="hvac" class="resource off">HVAC: Off</div>
+                <div id="water" class="resource off">Water Facility: Off</div>
+            </div>
+        </div>
+
+        <!-- Action buttons -->
+        <div class="action-buttons">
+            <button id="personEnter">Person Enter</button>
+            <button id="personExit">Person Exit</button>
+        </div>
+
+        <!-- Status display -->
+        <div class="status">
+            <p id="statusText">No person in the room. All resources are off.</p>
+        </div>
+    </div>
+
+    <script>
+        let personInRoom = false;
+
+        // Function to update the status of resources
+        function updateResources() {
+            if (personInRoom) {
+                // Resources ON
+                document.getElementById('light').classList.remove('off');
+                document.getElementById('light').classList.add('on');
+                document.getElementById('light').textContent = 'Light: On';
+
+                document.getElementById('hvac').classList.remove('off');
+                document.getElementById('hvac').classList.add('on');
+                document.getElementById('hvac').textContent = 'HVAC: On';
+
+                document.getElementById('water').classList.remove('off');
+                document.getElementById('water').classList.add('on');
+                document.getElementById('water').textContent = 'Water Facility: On';
+
+                document.getElementById('statusText').textContent = 'Person in the room. Resources are on.';
+            } else {
+                // Resources OFF
+                document.getElementById('light').classList.remove('on');
+                document.getElementById('light').classList.add('off');
+                document.getElementById('light').textContent = 'Light: Off';
+
+                document.getElementById('hvac').classList.remove('on');
+                document.getElementById('hvac').classList.add('off');
+                document.getElementById('hvac').textContent = 'HVAC: Off';
+
+                document.getElementById('water').classList.remove('on');
+                document.getElementById('water').classList.add('off');
+                document.getElementById('water').textContent = 'Water Facility: Off';
+
+                document.getElementById('statusText').textContent = 'No person in the room. All resources are off.';
+            }
+        }
+
+        // Button click events
+        document.getElementById('personEnter').addEventListener('click', () => {
+            personInRoom = true;
+            // Animate the person entering the desk
+            document.getElementById('person1').classList.remove('person-exit');
+            document.getElementById('person1').classList.add('person-enter');
+            updateResources();
+        });
+
+        document.getElementById('personExit').addEventListener('click', () => {
+            personInRoom = false;
+            // Animate the person exiting the desk
+            document.getElementById('person1').classList.remove('person-enter');
+            document.getElementById('person1').classList.add('person-exit');
+            updateResources();
+        });
+
+        // Initialize with no person in the room
+        updateResources();
+    </script>
+
+</body>
+</html>

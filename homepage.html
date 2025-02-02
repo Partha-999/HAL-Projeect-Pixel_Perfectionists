@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KBR SeatSmart Dashboard</title>
+    <style>
+        /* Base Styling */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 85%;
+            margin: 0 auto;
+            padding-top: 40px;
+            background-color: #ffffff;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            padding-bottom: 40px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            color: #003d73;
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        .header p {
+            color: #555;
+            font-size: 16px;
+        }
+
+        /* Office selection and shifts */
+        .select-office, .shifts {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .select-office label {
+            font-size: 16px;
+            color: #333;
+        }
+        .select-office select {
+            padding: 8px;
+            font-size: 14px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            background-color: #f5f5f5;
+        }
+        .shifts {
+            text-align: center;
+        }
+        .shift-time {
+            display: inline-block;
+            font-size: 16px;
+            font-weight: bold;
+            padding: 10px 20px;
+            background-color: #003d73;
+            color: white;
+            border-radius: 5px;
+            margin: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .shift-time:hover {
+            background-color: #005b8c;
+        }
+
+        /* Room container */
+        .room {
+            border: 3px solid #003d73;
+            padding: 20px;
+            margin-top: 30px;
+            background-color: #f8f8f8;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        /* Desk and seat styling */
+        .seating-arrangement {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .desk-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .desk-label {
+            font-weight: bold;
+            font-size: 14px;
+            color: #003d73;
+            background-color: #ffe5b8;
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+
+        .desk {
+            display: grid;
+            grid-template-columns: repeat(3, 60px);
+            grid-template-rows: repeat(2, 60px);
+            gap: 5px;
+            background: #ddd;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .seat {
+            width: 60px;
+            height: 60px;
+            background-color: #f4b400;
+            text-align: center;
+            line-height: 60px;
+            font-size: 14px;
+            font-weight: bold;
+            color: #fff;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+        .seat.selected {
+            background-color: #0073e6;
+            transform: scale(1.1);
+        }
+        .seat.unavailable {
+            background-color: #d3d3d3;
+            cursor: not-allowed;
+        }
+
+        /* Button Styling */
+        button {
+            padding: 12px 24px;
+            background-color: #003d73;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 5px;
+            margin: 10px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #005b8c;
+        }
+        .navigate-button {
+            background-color: #ff7043;
+        }
+        .navigate-button:hover {
+            background-color: #e64a19;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <h1>KBR SeatSmart - Dynamic Seat Allocation</h1>
+            <p>Optimizing seat occupancy, resource utilization, and future growth with FCFS-based seat booking.</p>
+        </div>
+
+        <!-- Office selection -->
+        <div class="select-office">
+            <label for="officeSelect">Select Office:</label>
+            <select id="officeSelect">
+                <option value="office1">Office 1</option>
+                <option value="office2">Office 2</option>
+                <option value="office3">Office 3</option>
+            </select>
+        </div>
+
+        <!-- Shifts -->
+        <div class="shifts">
+            <div>
+                <p class="shift-time" id="morningShift">Morning Shift (6 AM - 2 PM)</p>
+            </div>
+            <div>
+                <p class="shift-time" id="afternoonShift">Afternoon Shift (2 PM - 10 PM)</p>
+            </div>
+            <div>
+                <p class="shift-time" id="nightShift">Night Shift (10 PM - 6 AM)</p>
+            </div>
+        </div>
+
+        <!-- Room container with desks inside -->
+        <div class="room">
+            <div class="seating-arrangement" id="seatingArrangement">
+                <!-- Desks with seats will be dynamically generated here -->
+            </div>
+        </div>
+
+        <!-- Buttons -->
+        <div class="actions">
+            <button id="allocateBtn">Allocate Seat</button>
+            <button id="adminBtn">Admin</button>
+            <button class="navigate-button" onclick="window.location.href='seatallocation.html'">Go to Seat Allocation</button>
+        </div>
+    </div>
+
+    <script>
+        function generateSeatsForShift(start, end) {
+            const seatingContainer = document.getElementById('seatingArrangement');
+            seatingContainer.innerHTML = '';  
+            let deskCounter = 1;
+
+            for (let i = start; i <= end; i += 6) {
+                // Create container for desk label and desk seats
+                const deskContainer = document.createElement('div');
+                deskContainer.classList.add('desk-container');
+
+                // Desk label
+                const deskLabel = document.createElement('div');
+                deskLabel.classList.add('desk-label');
+                deskLabel.textContent = `Desk ${deskCounter}`;
+                deskCounter++;
+
+                // Desk with seats
+                const desk = document.createElement('div');
+                desk.classList.add('desk');
+
+                for (let j = i; j < i + 6 && j <= end; j++) {
+                    const seat = document.createElement('div');
+                    seat.classList.add('seat');
+                    seat.textContent = j;
+                    seat.dataset.seatNumber = j;
+
+                    seat.addEventListener('click', () => {
+                        const selectedSeats = document.querySelectorAll('.seat.selected');
+                        if (seat.classList.contains('selected')) {
+                            seat.classList.remove('selected');
+                        } else if (selectedSeats.length < 6) {
+                            seat.classList.add('selected');
+                        } else {
+                            alert("You can select up to 6 seats only.");
+                        }
+                    });
+
+                    desk.appendChild(seat);
+                }
+
+                // Append label and desk together
+                deskContainer.appendChild(deskLabel);
+                deskContainer.appendChild(desk);
+
+                seatingContainer.appendChild(deskContainer);
+            }
+        }
+
+        // Handle shift selection
+        document.getElementById('morningShift').addEventListener('click', () => {
+            generateSeatsForShift(1, 1000);
+        });
+
+        document.getElementById('afternoonShift').addEventListener('click', () => {
+            generateSeatsForShift(1001, 2000);
+        });
+
+        document.getElementById('nightShift').addEventListener('click', () => {
+            generateSeatsForShift(2001, 3000);
+        });
+
+        // Default to Morning shift on load
+        generateSeatsForShift(1, 1000);
+
+        // Handle office selection
+        document.getElementById('officeSelect').addEventListener('change', (event) => {
+            console.log('Selected Office:', event.target.value);
+        });
+
+        // Admin button functionality (Redirect to admin.html)
+        document.getElementById('adminBtn').addEventListener('click', () => {
+            window.location.href = 'admin.html';  
+        });
+
+        // Allocate Seat button functionality
+        document.getElementById('allocateBtn').addEventListener('click', () => {
+            const selectedSeats = document.querySelectorAll('.seat.selected');
+            if (selectedSeats.length > 0) {
+                let seatNumbers = [];
+                selectedSeats.forEach(seat => seatNumbers.push(seat.dataset.seatNumber));
+
+                localStorage.setItem('selectedSeats', JSON.stringify(seatNumbers));
+
+                alert(`Seats allocated: ${seatNumbers.join(', ')}`);
+            } else {
+                alert('Please select at least one seat.');
+            }
+        });
+    </script>
+
+</body>
+</html>

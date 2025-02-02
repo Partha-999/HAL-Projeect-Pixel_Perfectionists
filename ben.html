@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SeatSmart Dashboard</title>
+    <!-- Add Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 80%;
+            margin: 0 auto;
+            padding-top: 20px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            color: #333;
+        }
+        .select-office, .shifts {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .shifts {
+            text-align: center;
+        }
+        .shift-time {
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .shift-time:hover {
+            color: #1e90ff;
+        }
+
+        /* Room container for all desks and the water facility */
+        .room {
+            display: flex;
+            justify-content: space-between;
+            border: 3px solid #333;
+            padding: 20px;
+            margin-top: 20px;
+            background-color: #fff;
+            box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            flex-wrap: wrap;
+        }
+
+        /* Desk arrangement */
+        .seating-arrangement {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 10px;
+        }
+
+        .desk-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .desk-label {
+            font-weight: bold;
+            font-size: 14px;
+            color: #333;
+            background-color: #f0f0f0;
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+
+        .desk {
+            display: grid;
+            grid-template-columns: repeat(3, 50px);
+            grid-template-rows: repeat(2, 50px);
+            gap: 5px;
+            background: #ddd;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        /* Seat styling */
+        .seat {
+            width: 50px;
+            height: 50px;
+            background-color: #ccc;
+            text-align: center;
+            line-height: 50px;
+            font-size: 12px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .seat.selected {
+            background-color: #1e90ff;
+            color: white;
+        }
+        .seat.unavailable {
+            background-color: #d3d3d3;
+            cursor: not-allowed;
+        }
+
+        /* Button styling */
+        button {
+            padding: 10px 20px;
+            background-color: #1e90ff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 5px;
+            margin: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .navigate-button {
+            background-color: #ff6347;
+        }
+        .navigate-button:hover {
+            background-color: #e5533d;
+        }
+
+        /* Position the water facility inside the room */
+        .water-facility {
+            font-size: 40px;
+            color: #1e90ff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            padding: 20px;
+            background-color: #f0f0f0;
+            border-radius: 10px;
+            width: 100px;
+            height: 100px;
+            margin-left: 20px;
+        }
+
+        .water-facility i {
+            margin-bottom: 10px;
+        }
+
+        .water-facility span {
+            font-size: 14px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <h1>SeatSmart - Dynamic Seat Allocation System</h1>
+            <p>Optimizing seat occupancy, resource utilization, and future growth with FCFS-based seat booking.</p>
+        </div>
+
+        <!-- Office selection -->
+        <div class="select-office">
+            <label for="officeSelect">Select Office:</label>
+            <select id="officeSelect">
+                <option value="office1">Office 1</option>
+                <option value="office2">Office 2</option>
+                <option value="office3">Office 3</option>
+            </select>
+        </div>
+
+        <!-- Shifts -->
+        <div class="shifts">
+            <div>
+                <p class="shift-time" id="morningShift">Morning Shift (6 AM - 2 PM)</p>
+            </div>
+            <div>
+                <p class="shift-time" id="afternoonShift">Afternoon Shift (2 PM - 10 PM)</p>
+            </div>
+            <div>
+                <p class="shift-time" id="nightShift">Night Shift (10 PM - 6 AM)</p>
+            </div>
+        </div>
+
+        <!-- Room container with desks and water facility inside -->
+        <div class="room">
+            <!-- Seating Arrangement (Desks) -->
+            <div class="seating-arrangement" id="seatingArrangement">
+                <!-- Desks with seats will be dynamically generated here -->
+            </div>
+
+            <!-- Water Facility Icon -->
+            <div class="water-facility">
+                <i class="fas fa-tint"></i>
+                <span>Water Facility</span>
+            </div>
+        </div>
+
+        <!-- Buttons -->
+        <div class="actions">
+            <button id="allocateBtn">Allocate Seat</button>
+            <button id="adminBtn">Admin</button>
+            <button class="navigate-button" onclick="window.location.href='seatallocation.html'">Go to Seat Allocation</button>
+        </div>
+    </div>
+
+    <script>
+        function generateSeatsForShift(start, end) {
+            const seatingContainer = document.getElementById('seatingArrangement');
+            seatingContainer.innerHTML = '';  
+            let deskCounter = 1;
+
+            for (let i = start; i <= end; i += 6) {
+                // Create container for desk label and desk seats
+                const deskContainer = document.createElement('div');
+                deskContainer.classList.add('desk-container');
+
+                // Desk label
+                const deskLabel = document.createElement('div');
+                deskLabel.classList.add('desk-label');
+                deskLabel.textContent = `Desk ${deskCounter}`;
+                deskCounter++;
+
+                // Desk with seats
+                const desk = document.createElement('div');
+                desk.classList.add('desk');
+
+                for (let j = i; j < i + 6 && j <= end; j++) {
+                    const seat = document.createElement('div');
+                    seat.classList.add('seat');
+                    seat.textContent = j;
+                    seat.dataset.seatNumber = j;
+
+                    seat.addEventListener('click', () => {
+                        const selectedSeats = document.querySelectorAll('.seat.selected');
+                        if (seat.classList.contains('selected')) {
+                            seat.classList.remove('selected');
+                        } else if (selectedSeats.length < 6) {
+                            seat.classList.add('selected');
+                        } else {
+                            alert("You can select up to 6 seats only.");
+                        }
+                    });
+
+                    desk.appendChild(seat);
+                }
+
+                // Append label and desk together
+                deskContainer.appendChild(deskLabel);
+                deskContainer.appendChild(desk);
+
+                seatingContainer.appendChild(deskContainer);
+            }
+        }
+
+        // Handle shift selection
+        document.getElementById('morningShift').addEventListener('click', () => {
+            generateSeatsForShift(1, 1000);
+        });
+
+        document.getElementById('afternoonShift').addEventListener('click', () => {
+            generateSeatsForShift(1001, 2000);
+        });
+
+        document.getElementById('nightShift').addEventListener('click', () => {
+            generateSeatsForShift(2001, 3000);
+        });
+
+        // Default to Morning shift on load
+        generateSeatsForShift(1, 1000);
+
+        // Handle office selection
+        document.getElementById('officeSelect').addEventListener('change', (event) => {
+            console.log('Selected Office:', event.target.value);
+        });
+
+        // Admin button functionality (Redirect to admin.html)
+        document.getElementById('adminBtn').addEventListener('click', () => {
+            window.location.href = 'admin.html';  
+        });
+
+        // Allocate Seat button functionality
+        document.getElementById('allocateBtn').addEventListener('click', () => {
+            const selectedSeats = document.querySelectorAll('.seat.selected');
+            if (selectedSeats.length > 0) {
+                let seatNumbers = [];
+                selectedSeats.forEach(seat => seatNumbers.push(seat.dataset.seatNumber));
+
+                localStorage.setItem('selectedSeats', JSON.stringify(seatNumbers));
+
+                alert(`Seats allocated: ${seatNumbers.join(', ')}`);
+            } else {
+                alert('Please select at least one seat.');
+            }
+        });
+    </script>
+
+</body>
+</html>
